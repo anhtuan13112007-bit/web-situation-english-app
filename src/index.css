@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  --color-navy: #1B365D;
+  --color-accent: #2E6B9E;
+  --color-canvas: #F5F7FA;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-text: #1F2933;
+  --color-muted: #475569;
+  --color-info: #1D4ED8;
+  --color-info-bg: #DBEAFE;
+  --color-warning: #B45309;
+  --color-warning-bg: #FEF3C7;
+  --color-success: #15803D;
+  --color-success-bg: #DCFCE7;
+  --color-error: #B91C1C;
+  --color-error-bg: #FEE2E2;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-text);
+}
+
+.ipa-text {
+  font-family: 'Inter', 'Plus Jakarta Sans', 'DejaVu Sans', sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
