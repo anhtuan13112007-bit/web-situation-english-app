@@ -22,46 +22,58 @@ Tài liệu này hướng dẫn bạn toàn bộ quy trình:
 
 ---
 
-## 2. Hướng dẫn Đưa Web lên GitHub & Xuất bản Online Miễn phí
+## 2. Trạng thái GitHub Hiện tại & Cách Cập nhật Web Online
 
-### 2.1. Kiểm tra an toàn trước khi đẩy code
-- File `.gitignore` đã tự động loại trừ `node_modules/`, `dist/`, `.env`, `.env.local` nên sẽ **không bao giờ đẩy nhầm API Key** hay thư mục nặng lên GitHub.
-- File cấu hình xuất bản tự động `.github/workflows/deploy.yml` và `base: './'` trong `vite.config.ts` đã được cấu hình sẵn cho GitHub Pages.
+### 2.1. Link GitHub & Link Web Online đã xuất bản
+- **Repository GitHub (Public):** https://github.com/anhtuan13112007-bit/web-situation-english-app
+- **Link Web Online (GitHub Pages):** https://anhtuan13112007-bit.github.io/web-situation-english-app/
+- **Cơ chế nhánh đang dùng:**
+  - Nhánh `main`: lưu toàn bộ mã nguồn dự án (`src/`, `api/`, `Situation.docx`, `HUONG_DAN_DEPLOY_VA_CHINH_SUA.md`...).
+  - Nhánh `gh-pages`: chứa bản build tĩnh (`dist/` + file `.nojekyll`) để GitHub Pages phát trực tiếp.
+  - File `.gitignore` đã loại trừ `node_modules/`, `dist/`, `.env`, `.env.local` và `.github/workflows/` để đảm bảo không lộ API Key và tránh lỗi quyền `workflow` khi push.
 
-### 2.2. Các bước đẩy code lên GitHub (Lần đầu)
-1. Đăng nhập [GitHub](https://github.com) → bấm **New repository** → đặt tên (ví dụ: `situation-english-app`) → chọn **Public** (nếu dùng GitHub Pages miễn phí) → bấm **Create repository** (không cần tích README/.gitignore vì thư mục đã có).
-2. Mở **PowerShell** hoặc **Terminal** ngay trong thư mục dự án (`D:\WEB VIBE CODE HỌC TẬP\Situation Tự Luận\web-situation-english-app`) và chạy lần lượt các lệnh sau *(thay `<TEN-TAI-KHOAN>` và `<TEN-REPO>` bằng thông tin của bạn)*:
+### 2.2. Lưu ý quan trọng về Token `gh` & `.github/workflows/deploy.yml`
+- Token GitHub CLI (`gh`) hiện tại có các quyền `repo`, `gist`, `read:org` (chưa có scope `workflow`), nên GitHub từ chối push trực tiếp file `.github/workflows/deploy.yml`.
+- Vì vậy, hiện tại dự án **đã chặn `.github/workflows/` trong `.gitignore`** và deploy web online bằng cách đẩy thư mục `dist/` sang nhánh `gh-pages`.
+- Nếu sau này bạn muốn dùng **GitHub Actions** tự động build mỗi khi push `main`, hãy cấp thêm quyền `workflow` bằng lệnh:
+  ```powershell
+  gh auth refresh -h github.com -s workflow
+  ```
+  Sau đó xóa dòng `.github/workflows/` khỏi `.gitignore`, rồi đổi GitHub Pages sang **Settings → Pages → Source: GitHub Actions**.
 
-```powershell
-git init
-git add .
-git commit -m "Initial commit: Situation English 4-skill app"
-git branch -M main
-git remote add origin https://github.com/<TEN-TAI-KHOAN>/<TEN-REPO>.git
-git push -u origin main
-```
+### 2.3. Cách cập nhật web sau khi bạn sửa code / thêm nội dung
+Mỗi khi bạn sửa màu sắc, bố cục, từ vựng hoặc thêm tính năng mới trên máy:
 
-### 2.3. Bật GitHub Pages để có link web online (miễn phí)
-1. Vào repository trên GitHub → chọn tab **Settings** → mục **Pages** (cột trái).
-2. Ở phần **Build and deployment → Source**, chọn **`GitHub Actions`**.
-3. Chuyển sang tab **Actions** trên GitHub để xem workflow `Deploy Situation English to GitHub Pages` chạy (khoảng 1 phút).
-4. Khi hiện dấu tích xanh, bạn sẽ nhận được đường link online dạng:
-   `https://<TEN-TAI-KHOAN>.github.io/<TEN-REPO>/`
-
-### 2.4. Cập nhật web lên GitHub sau mỗi lần sửa code
-Mỗi khi bạn sửa nội dung, màu sắc hoặc thêm tính năng mới trên máy, chỉ cần chạy 3 lệnh:
-
+**Bước 1 — Lưu mã nguồn lên nhánh `main`:**
 ```powershell
 git add .
 git commit -m "Mo ta ngan gon nhung gi ban vua sua"
 git push
 ```
-GitHub Actions sẽ tự động build lại và cập nhật trang web online sau ~1 phút.
 
-### 2.5. (Tùy chọn) Đưa lên Vercel nếu muốn ẩn API Key cho người khác dùng chung
+**Bước 2 — Build lại và cập nhật trang web online (`gh-pages`):**
+```powershell
+npm run build
+$tmp = Join-Path $env:TEMP 'wse-gh-pages'
+if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
+New-Item -ItemType Directory -Path $tmp | Out-Null
+Copy-Item -Path 'dist\*' -Destination $tmp -Recurse -Force
+New-Item -ItemType File -Path (Join-Path $tmp '.nojekyll') -Force | Out-Null
+Push-Location $tmp
+git init -b gh-pages
+git add .
+git commit -m "Update GitHub Pages"
+git remote add origin https://github.com/anhtuan13112007-bit/web-situation-english-app.git
+git push -f origin gh-pages
+Pop-Location
+Remove-Item -Recurse -Force $tmp
+```
+Sau ~30–60 giây, link https://anhtuan13112007-bit.github.io/web-situation-english-app/ sẽ hiển thị bản mới nhất (bấm `Ctrl + F5` trên Edge nếu trình duyệt lưu cache cũ).
+
+### 2.4. (Tùy chọn) Đưa lên Vercel nếu muốn ẩn API Key cho người khác dùng chung
 - Trên GitHub Pages, người dùng tự nhập key Gemini/Groq miễn phí của họ trong mục **Cài đặt AI** (lưu cục bộ trên trình duyệt).
 - Nếu bạn muốn tạo link public dùng key của bạn thông qua proxy `api/grade.ts`:
-  1. Vào [Vercel](https://vercel.com) → **Add New Project** → chọn repo GitHub vừa tạo.
+  1. Vào [Vercel](https://vercel.com) → **Add New Project** → chọn repo `anhtuan13112007-bit/web-situation-english-app`.
   2. Vào **Settings → Environment Variables**, thêm `GEMINI_API_KEY` và/hoặc `GROQ_API_KEY`.
   3. Deploy xong, người dùng chỉ cần mở **Cài đặt AI** trên web và chọn chế độ **Vercel Proxy (`/api/grade`)**.
 
